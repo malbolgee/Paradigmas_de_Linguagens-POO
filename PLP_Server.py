@@ -69,6 +69,7 @@ class Server(Thread):
 
         cores = ['black', 'red', 'blue', 'green' ,'cyan' ,'magenta' ,'yellow']
         formas = ['s', 'c']
+
         reply = 'Done.\r\n'
 
         comando = cmd[0]
@@ -169,20 +170,20 @@ class Server(Thread):
 
     def run(self):
         while True:
-            try:
-                text = ' '
-                while(text[-1] != '\n'):
-                    text += self.client.recv(1024).decode("utf-8")
-                    print(text)
+            # try:
+            text = ' '
+            while(text[-1] != '\n'):
+                text += self.client.recv(1024).decode("utf-8")
+                print(text)
 
-                if not text:
-                    break
+            if not text:
+                break
 
-                self.client.sendall(bytes('\r\n', 'utf-8'))
-                reply = self.process_cmd(text.split())
-                self.client.sendall(bytes(reply, "utf-8"))
-            except:
-               break
+            # self.client.sendall(bytes('\r\n', 'utf-8'))
+            reply = self.process_cmd(text.split())
+            self.client.sendall(bytes(reply, "utf-8"))
+            # except:
+               # break
 
         self.grid.master.quit()
         self.client.close()
@@ -192,14 +193,19 @@ class shapeObject(object):
     objectList = []
 
     def __init__(self, canvas, id, shape, x1, y1, lin, col, color = 'black'):
-        print(id, shape, x1, x1, lin, col, color)
+        print(self, id, shape, x1, x1, lin, col, color)
         self.canvas = canvas
         self.id = id
         self.x1 = x1
         self.y1 = y1
         self.color = color
         self.shape = shape
-        shapeObject.objectList[int(lin)][int(col)] = (self, self.id, self.shape, self.color, int(lin), int(col))
+        self.objeto = None
+
+        shapeObject.objectList[int(lin)][int(col)] = [self.objeto, self.id, self.shape, self.color, int(lin), int(col)]
+
+    def draw(self):
+        pass
 
     @staticmethod
     def fillObjectList(lin, col):
@@ -208,14 +214,14 @@ class shapeObject(object):
             for j in range(col):
                 shapeObject.objectList[i].append(0)
 
-    @staticmethod
-    def showObjectList(lin, col):
+    # @staticmethod
+    # def showObjectList(lin, col):
 
-        for i in range(lin):
-            for j in range(col):
-                print(shapeObject.objectList[i][j], end = '')
+    #     for i in range(lin):
+    #         for j in range(col):
+    #             print(shapeObject.objectList[i][j], end = '')
 
-            print()
+    #         print()
 
 class circle(shapeObject):
 
@@ -223,9 +229,11 @@ class circle(shapeObject):
         super().__init__(canvas, id, shape, x1, y1, lin, col, color)
         self.x2 = x2
         self.y2 = y2
+        self.lin = lin
+        self.col = col
 
     def draw(self):
-        self.canvas.create_oval(self.x1, self.y1, self.x2, self.y2, fill = self.color, outline = '')
+        shapeObject.objectList[self.lin][self.col][0] = self.canvas.create_oval(self.x1, self.y1, self.x2, self.y2, fill = self.color, outline = '')
 
 class square(shapeObject):
 
@@ -233,10 +241,11 @@ class square(shapeObject):
         super().__init__(canvas, id, shape, x1, y1, lin, col, color)
         self.x2 = x2
         self.y2 = y2
+        self.lin = lin
+        self.col = col
 
     def draw(self):
-        self.canvas.create_rectangle(self.x1, self.y1, self.x2, self.y2, fill = self.color, outline = '')
-
+        shapeObject.objectList[self.lin][self.col][0] = self.canvas.create_rectangle(self.x1, self.y1, self.x2, self.y2, fill = self.color, outline = '')
 
 if __name__ == '__main__':
     root = Tk()
@@ -246,3 +255,4 @@ if __name__ == '__main__':
     app = Server(grid).start()
     root.resizable(0, 0)
     root.mainloop()
+
